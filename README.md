@@ -38,7 +38,8 @@ The objective is to explore how distributed applications handle concurrent order
 
 The system follows a microservices architecture where each service owns its business responsibilities and database.
 
-<img width="1457" height="687" alt="image" src="https://github.com/user-attachments/assets/08299d79-bf0e-47fc-b40a-60e640240138" />
+<img width="1392" height="692" alt="image" src="https://github.com/user-attachments/assets/7130f7c9-d498-4365-99bd-092ad994142a" />
+
 
 
 ### Core Components
