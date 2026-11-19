@@ -1,122 +1,70 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import React, { useState, useEffect } from "react";
+import Navbar from "./components/Navbar";
+import Hero from "./components/Hero";
+import InventoryDashboard from "./components/InventoryDashboard";
+import OrdersDashboard from "./components/OrdersDashboard";
+import Footer from "./components/Footer";
+import { checkServicesHealth } from "./services/api";
+import { Check, AlertCircle, Info, X } from "lucide-react";
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const [activeTab, setActiveTab] = useState("home");
+  const [health, setHealth] = useState({ orderService: false, inventoryService: false });
+  const [toast, setToast] = useState(null);
+
+  // Poll service health every 5 seconds
+  useEffect(() => {
+    const updateHealth = async () => {
+      const h = await checkServicesHealth();
+      setHealth(h);
+    };
+
+    updateHealth();
+    const interval = setInterval(updateHealth, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const showToast = (message, type = "info") => {
+    setToast({ message, type });
+    setTimeout(() => {
+      setToast(null);
+    }, 4500);
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
+    <div className="min-h-screen flex flex-col bg-black text-white selection:bg-white selection:text-black">
+      {/* Premium Monochromatic Toast Alert */}
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50 max-w-sm w-full animate-in fade-in duration-200">
+          <div className="p-4 rounded-xl border border-zinc-800 bg-zinc-950 text-white shadow-2xl flex items-start space-x-3">
+            <div className="w-5 h-5 rounded-full bg-white text-black flex items-center justify-center shrink-0 mt-0.5 font-bold text-xs">
+              {toast.type === "error" ? "!" : "✓"}
+            </div>
+            <div className="flex-1 text-xs font-mono leading-relaxed text-zinc-300">
+              {toast.message}
+            </div>
+            <button
+              onClick={() => setToast(null)}
+              className="text-zinc-500 hover:text-white p-0.5 rounded transition-colors"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+      )}
 
-      <div className="ticks"></div>
+      {/* Navigation */}
+      <Navbar activeTab={activeTab} setActiveTab={setActiveTab} health={health} />
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+      {/* Main Content */}
+      <main className="flex-1">
+        {activeTab === "home" && <Hero setActiveTab={setActiveTab} />}
+        {activeTab === "inventory" && <InventoryDashboard showToast={showToast} />}
+        {activeTab === "orders" && <OrdersDashboard showToast={showToast} />}
+      </main>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      {/* Footer */}
+      <Footer />
+    </div>
+  );
 }
-
-export default App
