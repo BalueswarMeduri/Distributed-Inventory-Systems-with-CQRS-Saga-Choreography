@@ -5,6 +5,7 @@ import orderRoutes from "./routes/orderRoutes.js";
 import { createOrderTable } from "./models/orderModel.js";
 import { connectProducer } from "./kafka/producer.js";
 import { initKafkaTopics } from "./kafka/client.js";
+import { startOrderConsumer } from "./kafka/consumer.js";
 
 dotenv.config();
 
@@ -33,8 +34,9 @@ app.use("/api/orders", orderRoutes);
 const startServer = async () => {
   try {
     await createOrderTable();
-    await initKafkaTopics(["order-events"]);
+    await initKafkaTopics(["order-events", "inventory-events"]);
     await connectProducer();
+    await startOrderConsumer();
     app.listen(PORT, () => {
       console.log(`Order Service is running on port ${PORT}`);
     });
